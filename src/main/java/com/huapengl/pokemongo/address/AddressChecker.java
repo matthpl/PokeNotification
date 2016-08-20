@@ -14,15 +14,19 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class AddressChecker {
-	private static final String GOOGL_MAP_API = "http://maps.googleapis.com/maps/api/geocode/json?sensor=false&latlng=";
+	private static final String GOOGL_MAP_API = "https://maps.googleapis.com/maps/api/geocode/json?sensor=false&key=";
 
 	private static final JsonParserFactory FACTORY = JsonParserFactory.getInstance();
 	private static final JSONParser PARSER = FACTORY.newJsonParser();
 	private static final OkHttpClient HTTP_CLIENT = new OkHttpClient();
-
+	private static final MapDataHelper MAP_CACHE = new MapDataHelper();
+	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public String getFormatAddressForCoord(String latlng) throws IOException {
-		Request request = new Request.Builder().url(GOOGL_MAP_API + latlng).build();
+	public String getFormatAddressForCoord(String latlng, String mapApiKey) throws IOException {
+		if(MAP_CACHE.getCityNameIfInCache(latlng) != null){
+			return MAP_CACHE.getCityNameIfInCache(latlng);
+		}
+		Request request = new Request.Builder().url(GOOGL_MAP_API + mapApiKey + "&latlng=" + latlng).build();
 
 		Response response = HTTP_CLIENT.newCall(request).execute();
 		String json = response.body().string();
@@ -38,7 +42,9 @@ public class AddressChecker {
 					for(HashMap addComp : addressComps) {
 						List<String> types = (List<String>) addComp.get("types");
 						if(types.contains("locality")) {
-							return (String)addComp.get("long_name");
+							String name = (String)addComp.get("long_name");
+							MAP_CACHE.putInCache(latlng, name);
+							return name;
 						}
 					}
 				} catch (Exception ee) {
@@ -46,8 +52,17 @@ public class AddressChecker {
 				}
 			}
 		} catch (JSONParsingException e) {
+			MAP_CACHE.putInCache(latlng, "");
 			return "";
 		}
+		MAP_CACHE.putInCache(latlng, "");
 		return "";
+	}
+	
+	/**
+	 * store map data
+	 */
+	public void checkPoint() {
+		MAP_CACHE.storeMapData();
 	}
 }

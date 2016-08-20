@@ -73,12 +73,13 @@ public class PokeSniperAddressParser {
 		return pokeMap;
 	}
 
-	public List<PokemonInfo> getPokemonsInCity(String cityName) throws IOException{
+	public List<PokemonInfo> getPokemonsInCity(String cityName, String mapApiKey) throws IOException{
 		List<PokemonInfo> pokeInfos = new ArrayList<PokemonInfo>();
 		Map<String, List<PokemonInfo>> pokeMap = getPokemonCoordMap();
 		for (List<PokemonInfo> infos : pokeMap.values()) {
 			for (PokemonInfo info : infos) {
-				String formattedAddress = CHECKER.getFormatAddressForCoord(info.getCoord()).toLowerCase();
+				
+				String formattedAddress = CHECKER.getFormatAddressForCoord(info.getCoord(), mapApiKey).toLowerCase();
 				if (!formattedAddress.contains(cityName.toLowerCase()))
 					continue;
 				DateTime until = ISODateTimeFormat.dateTime().parseDateTime(info.getLastUntil());
@@ -87,8 +88,10 @@ public class PokeSniperAddressParser {
 						formattedAddress,
 						info.getCoord(),
 						Seconds.secondsBetween(DateTime.now(), until).getSeconds());
+				pokeInfos.add(info);
 			}
 		}
+		CHECKER.checkPoint();
 		return pokeInfos;
 	}
 }

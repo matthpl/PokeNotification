@@ -18,53 +18,52 @@ import org.slf4j.LoggerFactory;
  */
 public class MapDataHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(MapDataHelper.class);
-    
-	private Map<String, String> map; // "coordinate, city";
 
-	@SuppressWarnings("unchecked")
-	public MapDataHelper() {
-		// restore map from file
-	    try{
-	        File toRead=new File("db");
-	        if(!toRead.exists()) {
-	        	map = new HashMap<String, String>();
-	        	return;
-	        }
-	        FileInputStream fis=new FileInputStream(toRead);
-	        ObjectInputStream ois=new ObjectInputStream(fis);
+    private Map<String, String> map; // "coordinate, city";
 
-	        map =(Map<String,String>)ois.readObject();
+    @SuppressWarnings("unchecked")
+    public MapDataHelper() {
+        // restore map from file
+        try {
+            final File toRead = new File("db");
+            if (!toRead.exists()) {
+                map = new HashMap<String, String>();
+                return;
+            }
+            FileInputStream fis = new FileInputStream(toRead);
+            ObjectInputStream ois = new ObjectInputStream(fis);
 
-	        ois.close();
-	        fis.close();
-	        LOGGER.info("Restoring from db, map size: " + map.size());
-	    }catch(Exception e){
-	    	map = new HashMap<String, String>();
-	    }
-	}
+            map = (Map<String, String>) ois.readObject();
 
-	public void storeMapData() {
-		// write to file : "db"
-		try {
-			File fileOne = new File("db");
-			fileOne.delete();
-			FileOutputStream fos = new FileOutputStream(fileOne);
-			ObjectOutputStream oos = new ObjectOutputStream(fos);
+            ois.close();
+            fis.close();
+            LOGGER.info("Restoring from db, map size: " + map.size());
+        } catch (Exception e) {
+            map = new HashMap<String, String>();
+        }
+    }
 
-			oos.writeObject(this.map);
-			oos.flush();
-			oos.close();
-			fos.close();
-			LOGGER.info("map checkpoint, map size " + map.size());
-		} catch (Exception e) {
-		}
-	}
-	
-	public String getCityNameIfInCache(String coord) {
-		return map.get(coord);
-	}
-	
-	public void putInCache(String coord, String city) {
-		map.put(coord, city);
-	}
+    public void storeMapData() {
+        // write to file : "db"
+        try {
+            final File fileOne = new File("db");
+            fileOne.delete();
+            FileOutputStream fos = new FileOutputStream(fileOne);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+
+            oos.writeObject(this.map);
+            oos.flush();
+            oos.close();
+            fos.close();
+            LOGGER.info("map checkpoint, map size " + map.size());
+        } catch (Exception e) {}
+    }
+
+    public String getCityNameIfInCache(String coord) {
+        return map.get(coord);
+    }
+
+    public void putInCache(String coord, String city) {
+        map.put(coord, city);
+    }
 }

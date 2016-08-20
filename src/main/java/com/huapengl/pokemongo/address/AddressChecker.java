@@ -33,8 +33,11 @@ public class AddressChecker {
         try {
             final List<HashMap> results = (ArrayList<HashMap>) PARSER.parseJson(json).get("results");
 
-            if (results.isEmpty())
+            if (results.isEmpty()){
+                MAP_CACHE.putInCache(latlng, "");
                 return "";
+            }
+
             // take the first one, if error, try the other
             for (HashMap map : results) {
                 try {

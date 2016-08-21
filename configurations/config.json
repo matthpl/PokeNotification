@@ -1,0 +1,8 @@
+{
+    "google_api_keys": [
+		"Put Key Here"
+    ],
+    "cities": [
+        "Seattle"
+    ]
+}

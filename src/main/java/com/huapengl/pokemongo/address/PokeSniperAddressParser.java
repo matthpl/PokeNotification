@@ -65,21 +65,24 @@ public class PokeSniperAddressParser {
         return pokeMap;
     }
 
-    public List<PokemonInfo> getPokemonsInCity(String cityName, String mapApiKey) throws IOException {
+    public List<PokemonInfo> getPokemonsInCity(List<String> cities, String mapApiKey) throws IOException {
         final List<PokemonInfo> pokeInfos = new ArrayList<PokemonInfo>();
         final Map<String, List<PokemonInfo>> pokeMap = getPokemonCoordMap();
         for (final List<PokemonInfo> infos : pokeMap.values()) {
             for (final PokemonInfo info : infos) {
 
-                String formattedAddress = addressChecker.getFormatAddressForCoord(info.getCoord(), mapApiKey).toLowerCase();
-                if (!formattedAddress.contains(cityName.toLowerCase()))
+                String formattedAddress = addressChecker.getFormatAddressForCoord(info.getCoord(), mapApiKey)
+                        .toLowerCase();
+                boolean found = false;
+                for (String cityName : cities) {
+                    if (formattedAddress.contains(cityName.toLowerCase()))
+                        found = true;
+                }
+                if (!found)
                     continue;
                 DateTime until = ISODateTimeFormat.dateTime().parseDateTime(info.getLastUntil());
-                LOGGER.info("!!! found {} in {}, cord {},  despawn in {} seconds",
-                        info.getName(),
-                        formattedAddress,
-                        info.getCoord(),
-                        Seconds.secondsBetween(DateTime.now(), until).getSeconds());
+                LOGGER.info("!!! found {} in {}, cord {},  despawn in {} seconds", info.getName(), formattedAddress,
+                        info.getCoord(), Seconds.secondsBetween(DateTime.now(), until).getSeconds());
                 pokeInfos.add(info);
             }
         }
